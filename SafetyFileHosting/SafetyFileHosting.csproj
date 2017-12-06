@@ -197,14 +197,17 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CertificatesManagerController.cs" />
+    <Compile Include="Controllers\FileModelsController.cs" />
     <Compile Include="Controllers\FilesBrowserController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="db\EntityDbContext.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
-    <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\FileModel.cs" />
+    <Compile Include="Models\ApplicationUser.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
@@ -271,6 +274,11 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\FilesBrowser\Index.cshtml" />
     <Content Include="Views\CertificatesManager\Index.cshtml" />
+    <Content Include="Views\FileModels\Create.cshtml" />
+    <Content Include="Views\FileModels\Delete.cshtml" />
+    <Content Include="Views\FileModels\Details.cshtml" />
+    <Content Include="Views\FileModels\Edit.cshtml" />
+    <Content Include="Views\FileModels\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
