@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
 using SafetyFileHosting.Models;
 using SafetyFileHosting.db;
 using SafetyFileHosting.Util;
@@ -19,7 +21,9 @@ namespace SafetyFileHosting.Controllers
         // GET: FileModels
         public ActionResult Index()
         {
-            return View(db.FileModels.ToList());
+            var loggedUserId = this.GetLoggedUserId();
+            var userFiles = db.FileModels.Where(x => x.UserId.Equals(loggedUserId)).ToList();
+            return View(userFiles);
         }
 
         // GET: FileModels/Details/5
@@ -57,17 +61,17 @@ namespace SafetyFileHosting.Controllers
                     return View(fileModel);
                 }
 
-                var relativePath = Path.Combine(ApplicationConstants.USER_FILE_DIRECTORY, this.GetUserName());
+                var relativePath = Path.Combine(ApplicationConstants.USER_FILE_DIRECTORY, this.GetLoggedUserName());
                 var serverPath = Server.MapPath(relativePath);
                 if (!Directory.Exists(serverPath))
                 {
                     Directory.CreateDirectory(serverPath);
                 }
-                fileModel.Author = this.GetUserName();
+                fileModel.Author = this.GetLoggedUserName();
                 fileModel.CreationDate = DateTime.Now;
                 fileModel.FileName = file.FileName;
                 fileModel.PathToFile = Path.Combine(relativePath, file.FileName);
-
+                fileModel.UserId = this.GetLoggedUserId();
                 file.SaveAs(Path.Combine(serverPath, file.FileName));
                 db.FileModels.Add(fileModel);
                 db.SaveChanges();

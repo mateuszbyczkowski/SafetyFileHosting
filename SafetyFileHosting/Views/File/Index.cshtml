@@ -11,52 +11,65 @@
     <title>Index</title>
 </head>
 <body>
-
-<table class="table">
-    <tr>
-
-        <th>
-            @Html.DisplayNameFor(model => model.FileName)
-        </th>
-
-        <th>
-            @Html.DisplayNameFor(model => model.Description)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CreationDate)
-        </th>
-        <th>
-            Available operations
-        </th>
-    </tr>
-
-    @foreach (var item in Model)
-    {
+@if (Model.Any())
+{
+    <table class="table">
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Author)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreationDate)
-            </td>
-            <td>
-                @Html.ActionLink("Download", "DownloadFile", new {id = item.Id}) |
-                @Html.ActionLink("Edit", "Edit", new {id = item.Id}) |
-                @Html.ActionLink("Details", "Details", new {id = item.Id}) |
-                @Html.ActionLink("Delete", "Delete", new {id = item.Id})
-            </td>
+
+            <th>
+                @Html.DisplayNameFor(model => model.FileName)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreationDate)
+            </th>
+            <th>
+                Available operations
+            </th>
         </tr>
-    }
 
-</table>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Author)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreationDate)
+                </td>
+                <td>
+                    @Html.ActionLink("Download", "DownloadFile", new {id = item.Id}) |
+                    @Html.ActionLink("Edit", "Edit", new {id = item.Id}) |
+                    @Html.ActionLink("Details", "Details", new {id = item.Id}) |
+                    @Html.ActionLink("Delete", "Delete", new {id = item.Id})
+                </td>
+            </tr>
+        }
 
-<div>
-    <p>
-        @Html.ActionLink("Create New", "Create", null, null, new {@class = "btn btn-primary"})
-    </p>
-</div>
+    </table>
+
+    <div>
+        <p>
+            @Html.ActionLink("Upload file", "Create", null, null, new {@class = "btn btn-primary"})
+        </p>
+    </div>
+}
+else
+{
+    <div>
+        <p class="alert alert-danger">
+            You don't have any files uploaded. Click 
+            @Html.ActionLink("here", "Create")
+            to upload new file
+        </p>
+    </div>
+}
+
 </body>
 </html>
