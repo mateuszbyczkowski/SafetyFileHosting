@@ -1,17 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using SafetyFileHosting.Models;
 using SafetyFileHosting.db;
+using SafetyFileHosting.Util;
 
 namespace SafetyFileHosting.Controllers
 {
-    public class FileModelsController : Controller
+    [Authorize]
+    public class FileController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
@@ -47,17 +48,62 @@ namespace SafetyFileHosting.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Description,Author,CreationDate")] FileModel fileModel)
+        public ActionResult Create(FileModel fileModel, HttpPostedFileBase file)
         {
-            if (ModelState.IsValid)
+            try
             {
+                if (!ModelState.IsValid || file == null || file.ContentLength == 0)
+                {
+                    return View(fileModel);
+                }
+
+                var relativePath = Path.Combine(ApplicationConstants.USER_FILE_DIRECTORY, this.GetUserName());
+                var serverPath = Server.MapPath(relativePath);
+                if (!Directory.Exists(serverPath))
+                {
+                    Directory.CreateDirectory(serverPath);
+                }
+                fileModel.Author = this.GetUserName();
+                fileModel.CreationDate = DateTime.Now;
+                fileModel.FileName = file.FileName;
+                fileModel.PathToFile = Path.Combine(relativePath, file.FileName);
+
+                file.SaveAs(Path.Combine(serverPath, file.FileName));
                 db.FileModels.Add(fileModel);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-
-            return View(fileModel);
+            catch (IOException e)
+            {
+                //todo: display error on user page
+                ModelState.AddModelError("file.creation.error", e.Message);
+                return View(fileModel);
+            }
         }
+
+        public void DownloadFile(int? id)
+        {
+            if (id == null)
+            {
+                throw new ArgumentException("File with this id doesn't exists");
+            }
+
+            var fileModel = db.FileModels.Find(id);
+            if (fileModel == null)
+            {
+                throw new ArgumentException("File doesn't exists");
+            }
+            var response = this.HttpContext.Response;
+            response.ClearContent();
+            response.Clear();
+            response.ContentType = "text/plain";
+            response.AddHeader("Content-Disposition",
+                "attachment; filename=" + fileModel.FileName + ";");
+            response.TransmitFile(Server.MapPath(fileModel.PathToFile));
+            response.Flush();
+            response.End();
+        }
+
 
         // GET: FileModels/Edit/5
         public ActionResult Edit(int? id)
