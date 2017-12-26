@@ -6,26 +6,39 @@ namespace SafetyFileHosting.Controllers
 {
     public class CertificatesManagerController : Controller
     {
-        // GET: CertificatesManager
         public ActionResult Index()
         {
-            /* WYGENEROWANIE NOWEGO CERTYFIKATU */
+            /* WYGENEROWANIE CERTYFIKATU DLA NOWEGO KLIENTA I ZAIMPORTOWANIE GO PO STRONIE SERWERA */
             CertificatesManager.Client = Request.UserHostAddress;
-            X509Certificate2 x509 = CertificatesManager.X509Certificate2;
+            X509Certificate2 wygenerowanyCertyfikat = CertificatesManager.X509Certificate2;
+
+            X509Store x509Store = new X509Store(StoreName.TrustedPeople, StoreLocation.CurrentUser);
+            x509Store.Open(OpenFlags.MaxAllowed);
+            x509Store.Add(wygenerowanyCertyfikat);
+            x509Store.Close();
 
             /*
-              DLA CHROME:
-              1) WPISZ NA PASKU ADRESU: chrome://flags/#allow-insecure-localhost
-              2) WŁĄCZ OPCJĘ 'Allow invalid certificates for resources loaded from localhost'
-              3) Ustawienia -> Zaawansowane -> Zarządzaj certyfikatami:
-              3a) Importuj -> (Wybierz wygenerowany certyfikat)
-              3b) Zaawansowane -> Uwierzytelnienie klienta
-             */
+            INSTRUKCJA JAK KLIENT POWINIEN DODAĆ CERTYFIKAT DO REQUESTA W CHROME:
 
-            /* POBRANIE INFORMACJI O CERTYFIKACIE ZALACZANYM DO REQUESTA W POSTACI JEDNEGO Z NAGLOWKOW
-               NIEZBEDNE W CELU SPRAWDZENIA CZY KLIENT POSLAL ŻĄDANIE ZALACZAJAC CERTYFIKAT CZY NIE
-             */
-            var certificate = Request.RequestContext.HttpContext.Request.ClientCertificate;
+            1) Wpisz na pasku adresu: chrome://flags/#allow-insecure-localhost
+            2) Włącz opcję 'Allow invalid certificates for resources loaded from localhost'
+            3) Ustawienia -> Zaawansowane -> Zarządzaj certyfikatami:
+            3a) Importuj -> (Wybierz wygenerowany certyfikat)
+            3b) Zaawansowane -> Uwierzytelnienie klienta
+            */
+
+            /* OBSŁUGA CERTYFIKATU ZAŁĄCZONEGO PRZEZ KLIENTA DO REQUESTA */
+            var odebranyCertyfikat = Request.RequestContext.HttpContext.Request.ClientCertificate;
+            if(odebranyCertyfikat.HasKeys()) {
+
+                X509Certificate2 cert = new X509Certificate2(odebranyCertyfikat.Certificate);
+                if (cert.Verify()) {
+                    // TODO ..
+                }
+                else {
+                    // TODO ..
+                }
+            }
 
             return View();
         }

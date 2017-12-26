@@ -6,13 +6,18 @@ using Org.BouncyCastle.Security;
 using System;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using System.Web.Hosting;
 
 namespace SafetyFileHosting.Models
 {
     public class CertificatesManager
     {
+        #region Properties
         public static string Client { get; set; } = "Undefined";
+
+        private static DateTime Start => DateTime.Now;
+        public static DateTime End { get; set; } = Start.AddYears(1);
+        #endregion
 
         public static X509Certificate2 X509Certificate2
         {
@@ -33,8 +38,8 @@ namespace SafetyFileHosting.Models
                 gen.SetSerialNumber(SN);
                 gen.SetSubjectDN(CN);
                 gen.SetIssuerDN(CN);
-                gen.SetNotAfter(DateTime.Now.AddYears(1));
-                gen.SetNotBefore(DateTime.Now.Subtract(new TimeSpan(7, 0, 0, 0)));
+                gen.SetNotBefore(Start);
+                gen.SetNotAfter(End);
                 gen.SetPublicKey(keys.Public);
 
                 gen.AddExtension(
@@ -60,22 +65,10 @@ namespace SafetyFileHosting.Models
             }
         }
 
-        public static void Save(X509Certificate cert)
+        private static void Save(X509Certificate cert)
         {
-            File.WriteAllBytes("C://Users/Matti/Desktop/Test.cer", cert.Export(X509ContentType.Cert));
-            byte[] certData = cert.Export(X509ContentType.Pfx, "P@ssw0rd");
-            File.WriteAllBytes(@"C://Users/Matti/Desktop/Test.pfx", certData);
-        }
-
-        public static string ExportToPEM(X509Certificate cert)
-        {
-            StringBuilder builder = new StringBuilder();
-
-            builder.AppendLine("-----BEGIN CERTIFICATE-----");
-            builder.AppendLine(Convert.ToBase64String(cert.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks));
-            builder.AppendLine("-----END CERTIFICATE-----");
-
-            return builder.ToString();
+            string path = HostingEnvironment.MapPath($@"~/Certificates/{cert.GetSerialNumberString()}.cer");
+            File.WriteAllBytes(path, cert.Export(X509ContentType.Cert));
         }
     }
 }
